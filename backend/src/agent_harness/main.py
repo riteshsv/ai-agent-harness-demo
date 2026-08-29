@@ -1,14 +1,5 @@
-import json
-import sys
 
-def emit(event_type: str, **data):
-    event = {
-        "type": event_type, 
-        **data
-        }
-    print(json.dumps(event),flush=True)
-
-
+from harness.events import emit
 
 
 def main():
