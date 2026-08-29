@@ -1,6 +1,5 @@
-from backend.src.agent_harness.harness.events import emit
-
-from ..tools.registry import ToolRegistry
+from src.agent_harness.harness.events import emit
+from src.agent_harness.tools.registry import ToolRegistry
 from .context import AgentContext
 from .state import AgentState
 
@@ -47,7 +46,7 @@ class AgentHarness:
         """
         return AgentContext(
             state=self.state, 
-            tools=self.tools.list_tools()
+            available_tools=self.tools.list_tools()
             )
     def observe(self, observation: str):
         """
