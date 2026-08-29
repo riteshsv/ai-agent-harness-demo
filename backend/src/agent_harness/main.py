@@ -1,4 +1,5 @@
 
+from src.agent_harness.agent.mock_agent import MockAgent
 from src.agent_harness.harness.harness import AgentHarness
 from src.agent_harness.harness.events import emit
 from src.agent_harness.tools.base import Tool
@@ -25,28 +26,65 @@ class EchoTool(Tool):
 
 def main():
 
+    #start the harness
+
     emit(
         "backend_started",
         message="Harness started successfully."
     )
+
+    #--------------------
+    # Create Tools
+    #--------------------
     
     registry = ToolRegistry()
     registry.register_tool(EchoTool())
+
+    #--------------------
+    # Start the Harness
+    #--------------------
 
     harness = AgentHarness(
         "Demo use of Echo Tool",
         registry
     )
 
-    harness.observe("Starting the harness with Echo Tool.")
+    # ------------------
+    # Create Agent
+    # ------------------
+
+    agent = MockAgent()
+
+    # --------------------
+    # Observe Environment
+    # --------------------
+
+
+    harness.observe("The workspace is ready")
+    
+    # ----------------------
+    # Create the Context
+    # ----------------------
     context = harness.create_context()
 
-    harness.execute_tool(
-        "echo",
-        {
-            "message":"Hello, Echo Tool!"
-        }
-    )
+    # ---------------------
+    # Agent decides what to do
+    # -------------------
+
+    action = agent.decide(context)
+
+    # ----------------------------
+    # harness executes the action 
+    # ----------------------------
+
+    harness.execute_action(action)
+
+    # harness.execute_tool(
+    #     "echo",
+    #     {
+    #         "message":"Hello, Echo Tool!"
+    #     }
+    # )
 
 
 

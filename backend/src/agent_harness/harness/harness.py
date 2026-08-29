@@ -2,6 +2,7 @@ from src.agent_harness.harness.events import emit
 from src.agent_harness.tools.registry import ToolRegistry
 from .context import AgentContext
 from .state import AgentState
+from src.agent_harness.agent.action import AgentAction
 
 class AgentHarness:
     def __init__(self, goal: str, tools: ToolRegistry):
@@ -57,7 +58,17 @@ class AgentHarness:
             "observation",
             content=observation
             )
-
+    def execute_action(
+        self,
+        action: AgentAction
+    ):
+        """
+        Execute an action and add the result to the state.
+        """
+        return self.execute_tool(
+            action.tool,
+            action.arguments
+        )
     def execute_tool(
             self,
             tool_name:str,
