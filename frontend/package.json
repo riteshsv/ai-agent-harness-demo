@@ -1,0 +1,21 @@
+{
+  "name": "ai-agent-harness-ui",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Ritesh Sangani",
+  "private":true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.tsx"
+  },
+  "dependencies": {
+    "ink": "^7.1.1",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
