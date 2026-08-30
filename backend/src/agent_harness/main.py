@@ -1,4 +1,5 @@
 
+from src.agent_harness.loop.ralph import RalphLoop
 from src.agent_harness.agent.mock_agent import MockAgent
 from src.agent_harness.harness.harness import AgentHarness
 from src.agent_harness.harness.events import emit
@@ -63,28 +64,15 @@ def main():
     harness.observe("The workspace is ready")
     
     # ----------------------
-    # Create the Context
+    # Ralph loop
     # ----------------------
-    context = harness.create_context()
+    loop = RalphLoop(
+        agent=agent,
+        harness=harness,
+        max_iterations=3
+    )
 
-    # ---------------------
-    # Agent decides what to do
-    # -------------------
-
-    action = agent.decide(context)
-
-    # ----------------------------
-    # harness executes the action 
-    # ----------------------------
-
-    harness.execute_action(action)
-
-    # harness.execute_tool(
-    #     "echo",
-    #     {
-    #         "message":"Hello, Echo Tool!"
-    #     }
-    # )
+    loop.run()
 
 
 
