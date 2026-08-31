@@ -7,14 +7,9 @@ class MockAgent(Agent):
         A mock agent that always returns a fixed action.
         """
 
-        if "echo" not in context.available_tools:
-            raise RuntimeError("Echo tool is not available in the context.")
         return AgentAction(
-            tool="echo",
+            tool="read_file",
             arguments={
-                "message": (
-                    f"Iteration {context.state.iteration}: "
-                    "Hello from the agent!"
-                )
+                "path": "task.md"
             }
         )

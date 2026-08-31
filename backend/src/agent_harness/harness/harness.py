@@ -47,7 +47,7 @@ class AgentHarness:
         """
         return AgentContext(
             state=self.state, 
-            available_tools=self.tools.list_tools()
+            available_tools=self.tools.describe_tools()
             )
     def observe(self, observation: str):
         """

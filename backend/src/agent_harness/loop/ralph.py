@@ -1,10 +1,12 @@
-
-
 from ..agent.base import Agent
 from ..harness.harness import AgentHarness
 from ..harness.events import emit
 
 class RalphLoop:
+    """
+    The RalphLoop is the orchestrator of the agent's reasoning process.
+    
+    """
     def __init__(
         self,
         agent,
@@ -43,16 +45,23 @@ class RalphLoop:
 
             #evaluate
 
+            if isinstance(result,dict) and result.get("success") is True:
+                self.harness.state.goal_achieved = True
+
+            if self.harness.state.goal_achieved:
+                self.harness.state.status = "completed"
+                emit(
+                    "goal_achieved",
+                    iterations=iteration,
+                    
+                )
+                break
+
+            
+            # goal not achieved so contitue iteration    
             emit(
                 "iteration_completed",
                 iteration=iteration,
                 result=result
-            )
-
-            self.harness.state.status = "completed"
-
-            emit(
-                "agent_completed",
-                iterations=self.harness.state.iteration
-            )
+                )
 

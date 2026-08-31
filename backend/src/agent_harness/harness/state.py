@@ -43,3 +43,4 @@ class AgentState:
     actions: list[dict[str,Any]] = field(default_factory=list)
 
     last_result: Any = None
+    goal_achieved: bool = False

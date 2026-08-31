@@ -1,4 +1,7 @@
 
+from pathlib import Path
+from .tools.filesystem import ReadTool, WriteTool
+from .tools.shell import RunCommandTool
 from src.agent_harness.loop.ralph import RalphLoop
 from src.agent_harness.agent.mock_agent import MockAgent
 from src.agent_harness.harness.harness import AgentHarness
@@ -23,7 +26,10 @@ class EchoTool(Tool):
         message = kwargs.get("message", "")
         if not message:
             raise ValueError("No message provided to echo.")
-        return message
+        return {
+            "message":message,
+            "success":True
+        }
 
 def main():
 
@@ -33,6 +39,7 @@ def main():
         "backend_started",
         message="Harness started successfully."
     )
+    workspace = Path("../workspace").resolve()
 
     #--------------------
     # Create Tools
@@ -40,7 +47,9 @@ def main():
     
     registry = ToolRegistry()
     registry.register_tool(EchoTool())
-
+    registry.register_tool(ReadTool(workspace))
+    registry.register_tool(WriteTool(workspace))
+    registry.register_tool(RunCommandTool(workspace))
     #--------------------
     # Start the Harness
     #--------------------

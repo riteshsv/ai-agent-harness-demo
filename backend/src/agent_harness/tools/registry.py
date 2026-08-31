@@ -28,3 +28,12 @@ class ToolRegistry:
 
     def list_tools(self) -> list[str]:
         return list(self._tools.keys())
+
+    def describe_tools(self) -> dict[str,str]:
+        return [
+            {
+                "name": tool.name,
+                "description": tool.description
+            } 
+            for tool in self._tools.values()
+        ]
