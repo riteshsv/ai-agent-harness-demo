@@ -3,6 +3,7 @@ from src.agent_harness.tools.registry import ToolRegistry
 from .context import AgentContext
 from .state import AgentState
 from src.agent_harness.agent.action import AgentAction
+from ..tools.result import ToolResult
 
 class AgentHarness:
     def __init__(self, goal: str, tools: ToolRegistry):
@@ -73,7 +74,7 @@ class AgentHarness:
             self,
             tool_name:str,
             arguments: dict
-            ):
+            ) -> ToolResult:
         """
         Execute a tool and add the result to the state.
         """
@@ -82,9 +83,15 @@ class AgentHarness:
             tool=tool_name,
             arguments=arguments
         )
+        try:
 
-        tool = self.tools.get(tool_name)
-        result = tool.execute(**arguments)
+            tool = self.tools.get(tool_name)
+            result = tool.execute(**arguments)
+        except Exception as e:
+            result = ToolResult(
+                success=False,
+                error=str(e)
+            )
         self.state.actions.append(
             {
                 "tool": tool_name, 
@@ -95,6 +102,8 @@ class AgentHarness:
         emit(
             "tool_completed",
             tool=tool_name,
-            result=result
+            success=result.success,
+            data=result.data if result.success else None,
+            error=result.error if not result.success else None
         )
         return result

@@ -55,7 +55,7 @@ def main():
     #--------------------
 
     harness = AgentHarness(
-        "Demo use of Echo Tool",
+        "Pytest return code 0",
         registry
     )
 

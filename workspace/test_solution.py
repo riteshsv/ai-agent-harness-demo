@@ -1,4 +1,4 @@
-from solution import fibonacci
+from solution import fibonacci_fast as fibonacci
 
 def test_fibonacci_zero():
     assert fibonacci(0) == 0

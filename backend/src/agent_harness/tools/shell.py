@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 from typing import Any
 from .base import Tool
-
+from .result import ToolResult
 
 class RunCommandTool(Tool):
     def __init__(self, workspace:Path):
@@ -27,21 +27,34 @@ class RunCommandTool(Tool):
         """
         Run the tool with the given arguments.
         """
-        command = kwargs.get("command")
-       
-        result = subprocess.run(
-            command,
-            shell=True,
-            cwd=self.workspace,
-            capture_output=True,
-            text=True,
-            timeout=30
-            
-        )
+        try:
+            command = kwargs.get("command")
+        
+            result = subprocess.run(
+                command,
+                shell=True,
+                cwd=self.workspace,
+                capture_output=True,
+                text=True,
+                timeout=30
+                
+            )
 
-        return {
-            "success": result.returncode == 0,
-            "return_code":result.returncode,
-            "stdout": result.stdout,
-            "stderr": result.stderr
-        }
+            return ToolResult(
+                success= result.returncode == 0,
+                data = {
+                    "return_code":result.returncode,
+                    "stdout": result.stdout,
+                    "stderr": result.stderr
+                }
+            )
+        except subprocess.TimeoutExpired:
+             return ToolResult(
+                success=False,
+                error="Command timed out."
+                )
+        except Exception as ex:
+            return ToolResult(
+                success=False,
+                error=str(ex)
+                )

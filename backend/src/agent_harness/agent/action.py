@@ -15,3 +15,4 @@ class AgentAction:
     """
     tool: Tool
     arguments: dict[str,Any]
+    description: str

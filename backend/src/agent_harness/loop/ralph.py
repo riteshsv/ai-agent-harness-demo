@@ -1,3 +1,7 @@
+from dataclasses import asdict
+
+from ..tools.result import ToolResult
+
 from ..agent.base import Agent
 from ..harness.harness import AgentHarness
 from ..harness.events import emit
@@ -28,8 +32,9 @@ class RalphLoop:
                 iteration=iteration
             )
 
-            #observe
-            context = self.harness.create_context()
+            #create context
+            if iteration == 1:
+                context = self.harness.create_context()
 
             #decide
             action = self.agent.decide(context)
@@ -39,14 +44,19 @@ class RalphLoop:
                 tool=action.tool,
                 arguments=action.arguments
             )
+            
 
             #execute
             result = self.harness.execute_action(action)
 
             #evaluate
 
-            if isinstance(result,dict) and result.get("success") is True:
-                self.harness.state.goal_achieved = True
+            if isinstance(result,ToolResult) and result.success:
+                goal = self.harness.state.goal
+                if goal == f"Pytest return code {result.data.get("return_code")}":
+                    self.harness.state.goal_achieved = True
+                
+                
 
             if self.harness.state.goal_achieved:
                 self.harness.state.status = "completed"
@@ -55,6 +65,9 @@ class RalphLoop:
                     iterations=iteration,
                     
                 )
+                # observe
+                self.harness.observe(f"Action: {action.description} success: {result.success}")
+                self.harness.observe("Goal achieved. Exiting loop.")
                 break
 
             
@@ -62,6 +75,8 @@ class RalphLoop:
             emit(
                 "iteration_completed",
                 iteration=iteration,
-                result=result
+                result=asdict(result)
                 )
+            # observe
+            self.harness.observe(f"Action: {action.description} success: {result.success}")
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 from .base import Tool
+from .result import ToolResult
 
 def resolve_workspace_path(
         workspace:Path,
@@ -35,23 +36,35 @@ class ReadTool(Tool):
         """
         Run the tool with the given arguments.
         """
-        path = kwargs.get("path")
-        if path is None:
-            raise ValueError("Path argument is required.")
-        resolved_path = resolve_workspace_path(self.workspace, path)
-        print(f"Resolved path: {resolved_path}")
-        if not resolved_path.exists():
-            return {
-                "success": False,
-                "error": f"File {path} does not exist."
-            }
-        content = resolved_path.read_text()
+        try:
+            path = kwargs.get("path")
+            if path is None:
+                return ToolResult(
+                    success=False,
+                    error="Path argument is required."
+                    )
+            resolved_path = resolve_workspace_path(self.workspace, path)
+            if not resolved_path.exists():
+                return ToolResult(
+                    success=False,
+                    error=f"File {path} does not exist."
+                )
+                
+            content = resolved_path.read_text()
 
-        return {
-            "success": True,
-            "path":path,
-            "content": content
-        }
+            return ToolResult(
+                success=True,
+                data={
+                    "path":path,
+                    "content": content
+                } 
+            )
+        except Exception as ex:
+            return ToolResult(
+                success=False,
+                error=str(ex)
+            )
+        
 
 class WriteTool(Tool):
     def __init__(self, workspace:Path):
@@ -75,27 +88,37 @@ class WriteTool(Tool):
         """
         Run the tool with the given arguments.
         """
-        path = kwargs.get("path")
-        content = kwargs.get("content")
+        try:
+            path = kwargs.get("path")
+            content = kwargs.get("content")
 
-        if path is None:
-            raise ValueError("Path argument is required.")
+            if path is None:
+                return ToolResult(
+                    success=False,
+                    error="Path argument is required."
+                )
 
-        resolved_path = resolve_workspace_path(self.workspace, path)
-        if not resolved_path.exists():
-            return {
-                "success": False,
-                "error": f"File {path} does not exist."
-            }
+            resolved_path = resolve_workspace_path(self.workspace, path)
+            if not resolved_path.exists():
+                return ToolResult(
+                    success=False,
+                    error=f"File {path} does not exist."
+                )
 
-        resolved_path.parent.mkdir(
-            parents=True, 
-            exist_ok=True
-        )
-        resolved_path.write_text(content)
+            resolved_path.parent.mkdir(
+                parents=True, 
+                exist_ok=True
+            )
+            resolved_path.write_text(content)
 
-        return {
-            "success": True,
-            "path":path
-            
-        }
+            return ToolResult(
+                    success=True,
+                    data = {
+                        "path":path
+                        }
+                    )
+        except Exception as ex:
+            return ToolResult(
+                success=False,
+                error=str(ex)
+            )
