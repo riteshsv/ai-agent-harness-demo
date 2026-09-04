@@ -13,24 +13,13 @@ class MockAgent(Agent):
         """
 
         # read file task.md
-
         state = context.state
-        latest_task_entry = None
-        for obs in reversed(state.observations):
-            if "task.md" in obs:
-                latest_task_entry = obs
-                break
-        if latest_task_entry:
-            if 'success: False' in latest_task_entry:
-                # If the file has not been read, read it
-                return AgentAction(
-                    tool="read_file",
-                    arguments={
-                        "path": "task.md"
-                    },
-                    description="Read the task description from task.md"
-                )
-        else:
+        last_tool = state.last_result.get(
+            "tool") if state.last_result else None
+        last_success = state.last_result.get("result", {}).get(
+            "success") if state.last_result else None
+
+        if (last_tool and last_tool == "read_file" and last_success is False) or last_tool is None:
             # If the file has not been read, read it
             return AgentAction(
                 tool="read_file",
@@ -40,66 +29,29 @@ class MockAgent(Agent):
                 description="Read the task description from task.md"
             )
 
-        latest_solution_entry = None
-        for obs in reversed(state.observations):
-            if "solution.py" in obs:
-                latest_solution_entry = obs
-                break
-        if latest_solution_entry:
-            # If the file has not been written, write it
-            if 'success: False' in latest_solution_entry:
-                return AgentAction(
-                    tool="write_file",
-                    arguments={
-                        "path": "solution.py",
-                        "content": textwrap.dedent("""\
-                            def fibonacci_fast(n):
-                                if n <= 1:
-                                    return n
-                                
-                                a, b = 0, 1
-                                for _ in range(2, n + 1):
-                                    a, b = b, a + b
-                                return b""")
-                    },
-                    description="Write the Fibonacci function to solution.py"
-                )
-        else:
+        if (last_tool and last_tool == "write_file" and last_success is False) \
+            or (last_tool == "read_file" and last_success is True):
             # If the file has not been written, write it
             return AgentAction(
                 tool="write_file",
                 arguments={
                     "path": "solution.py",
-                    "content": "def fibonacci_fast(n):\n"
-                               "    if n <= 1:\n"
-                               "        return n\n"
-                               "\n"
-                               "    a, b = 0, 1\n"
-                               "    for _ in range(2, n + 1):\n"
-                               "        a, b = b, a + b\n"
-                               "    return b"
+                    "content": textwrap.dedent("""\
+                        def fibonacci_fast(n):
+                            if n <= 1:
+                                return n
+                            
+                            a, b = 0, 1
+                            for _ in range(2, n + 1):
+                                a, b = b, a + b
+                            return b""")
                 },
                 description="Write the Fibonacci function to solution.py"
             )
 
-        latest_test_entry = None
-        for obs in reversed(state.observations):
-            if "pytest" in obs:
-                latest_test_entry = obs
-                break
-
-        if latest_test_entry:
-            if 'success: False' in latest_test_entry:
-                # If the tests have failed, run again
-                return AgentAction(
-                    tool="run_command",
-                    arguments={
-                        "command": "pytest test_solution.py"
-                    },
-                    description="Run pytest on the solution file"
-                )
-        else:
-            # If the tests have not been run, run them
+        if (last_tool and last_tool == "run_command" and last_success is False) \
+            or (last_tool == "write_file" and last_success is True):
+            # If the tests have failed, run again
             return AgentAction(
                 tool="run_command",
                 arguments={
@@ -107,3 +59,96 @@ class MockAgent(Agent):
                 },
                 description="Run pytest on the solution file"
             )
+
+        # latest_task_entry = None
+        # for obs in reversed(state.observations):
+        #     if "task.md" in obs:
+        #         latest_task_entry = obs
+        #         break
+        # if latest_task_entry:
+        #     if 'success: False' in latest_task_entry:
+        #         # If the file has not been read, read it
+        #         return AgentAction(
+        #             tool="read_file",
+        #             arguments={
+        #                 "path": "task.md"
+        #             },
+        #             description="Read the task description from task.md"
+        #         )
+        # else:
+        #     # If the file has not been read, read it
+        #     return AgentAction(
+        #         tool="read_file",
+        #         arguments={
+        #             "path": "task.md"
+        #         },
+        #         description="Read the task description from task.md"
+        #     )
+
+        # latest_solution_entry = None
+        # for obs in reversed(state.observations):
+        #     if "solution.py" in obs:
+        #         latest_solution_entry = obs
+        #         break
+        # if latest_solution_entry:
+        #     # If the file has not been written, write it
+        #     if 'success: False' in latest_solution_entry:
+        #         return AgentAction(
+        #             tool="write_file",
+        #             arguments={
+        #                 "path": "solution.py",
+        #                 "content": textwrap.dedent("""\
+        #                     def fibonacci_fast(n):
+        #                         if n <= 1:
+        #                             return n
+                                
+        #                         a, b = 0, 1
+        #                         for _ in range(2, n + 1):
+        #                             a, b = b, a + b
+        #                         return b""")
+        #             },
+        #             description="Write the Fibonacci function to solution.py"
+        #         )
+        # else:
+        #     # If the file has not been written, write it
+        #     return AgentAction(
+        #         tool="write_file",
+        #         arguments={
+        #             "path": "solution.py",
+        #             "content": "def fibonacci_fast(n):\n"
+        #                        "    if n <= 1:\n"
+        #                        "        return n\n"
+        #                        "\n"
+        #                        "    a, b = 0, 1\n"
+        #                        "    for _ in range(2, n + 1):\n"
+        #                        "        a, b = b, a + b\n"
+        #                        "    return b"
+        #         },
+        #         description="Write the Fibonacci function to solution.py"
+        #     )
+
+        # latest_test_entry = None
+        # for obs in reversed(state.observations):
+        #     if "pytest" in obs:
+        #         latest_test_entry = obs
+        #         break
+
+        # if latest_test_entry:
+        #     if 'success: False' in latest_test_entry:
+        #         # If the tests have failed, run again
+        #         return AgentAction(
+        #             tool="run_command",
+        #             arguments={
+        #                 "command": "pytest test_solution.py"
+        #             },
+        #             description="Run pytest on the solution file"
+        #         )
+        # else:
+        #     # If the tests have not been run, run them
+        #     return AgentAction(
+        #         tool="run_command",
+        #         arguments={
+        #             "command": "pytest test_solution.py"
+        #         },
+        #         description="Run pytest on the solution file"
+        #     )

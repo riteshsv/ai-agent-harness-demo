@@ -48,7 +48,11 @@ class RalphLoop:
 
             #execute
             result = self.harness.execute_action(action)
-
+            self.harness.state.last_result = {
+                "tool": action.tool,
+                "arguments": action.arguments,
+                "result": asdict(result)
+            } #update state with last result
             #evaluate
 
             if isinstance(result,ToolResult) and result.success:
